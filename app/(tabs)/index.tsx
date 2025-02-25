@@ -7,7 +7,6 @@ import {
   Modal,
   TextInput,
   Alert,
-  ActivityIndicator,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import Checkbox from "expo-checkbox";
@@ -50,10 +49,9 @@ const darkTheme: ThemeColors = {
 };
 
 const ToDoApp = () => {
-  const [isDarkMode, setIsDarkMode] = useState("dark");
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const theme = isDarkMode ? darkTheme : lightTheme;
   const [toDo, setToDo] = useState<ToDo[]>([]);
-  const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newDescription, setNewDescription] = useState("");
@@ -61,12 +59,11 @@ const ToDoApp = () => {
   const [selectedToDo, setSelectedToDo] = useState<ToDo | null>(null);
 
   const fetchToDo = async () => {
-    setLoading(true);
     try {
       const response = await fetch(API.URL, {
         method: "GET",
         headers: {
-          accept: API.ACC,
+          "Content-Type": API.ACC,
           "X-API-Key": API.API,
         },
       });
@@ -75,8 +72,6 @@ const ToDoApp = () => {
     } catch (err) {
       Alert.alert("Error", "Failed to fetch todos");
       console.log(err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -89,9 +84,8 @@ const ToDoApp = () => {
       const response = await fetch(API.URL, {
         method: "POST",
         headers: {
-          accept: API.ACC,
+          "Content-Type": API.ACC,
           "X-API-Key": API.API,
-          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           title: newTitle,
@@ -122,9 +116,8 @@ const ToDoApp = () => {
       const response = await fetch(`${API.URL}${selectedToDo.id}`, {
         method: "PUT",
         headers: {
-          accept: API.ACC,
+          "Content-Type": API.ACC,
           "X-API-Key": API.API,
-          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           title: newTitle,
@@ -152,9 +145,8 @@ const ToDoApp = () => {
       const response = await fetch(`${API.URL}${todo.id}`, {
         method: "PUT",
         headers: {
-          accept: API.ACC,
+          "Content-Type": API.ACC,
           "X-API-Key": API.API,
-          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           ...todo,
@@ -182,7 +174,7 @@ const ToDoApp = () => {
             const response = await fetch(`${API.URL}${id}`, {
               method: "DELETE",
               headers: {
-                accept: API.ACC,
+                "Content-Type": API.ACC,
                 "X-API-Key": API.API,
               },
             });
@@ -221,64 +213,66 @@ const ToDoApp = () => {
     fetchToDo();
   }, []);
 
-  const renderItem = ({ item }: { item: ToDo }) => (
-    <View style={styles.card}>
-      <View style={styles.cardHeader}>
-        <View style={styles.checkboxContainer}>
-          <Checkbox
-            value={item.status === "completed"}
-            onValueChange={() => toggleStatus(item)}
-            color={item.status === "completed" ? "#4CAF50" : undefined}
-            style={styles.checkbox}
-          />
-          <Text
+  const renderItem = ({ item }: { item: ToDo }) => {
+    return (
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <View style={styles.checkboxContainer}>
+            <Checkbox
+              value={item.status === "completed"}
+              onValueChange={() => toggleStatus(item)}
+              color={item.status === "completed" ? "#4CAF50" : undefined}
+              style={styles.checkbox}
+            />
+            <Text
+              style={[
+                styles.title,
+                item.status === "completed" && styles.completedText,
+              ]}
+            >
+              {item.title}
+            </Text>
+          </View>
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+              onPress={() => handleEdit(item)}
+              style={styles.iconButton}
+            >
+              <MaterialIcons name="edit" size={22} color={theme.primary} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => deleteToDo(item.id)}
+              style={styles.iconButton}
+            >
+              <MaterialIcons name="delete" size={22} color="#f44336" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {item.description ? (
+          <Text style={styles.description}>{item.description}</Text>
+        ) : null}
+
+        <View style={styles.cardFooter}>
+          <Text style={styles.date}>
+            {new Date(item.created_at).toLocaleDateString()}
+          </Text>
+          <View
             style={[
-              styles.title,
-              item.status === "completed" && styles.completedText,
+              styles.statusBadge,
+              item.status === "completed"
+                ? styles.completedBadge
+                : styles.pendingBadge,
             ]}
           >
-            {item.title}
-          </Text>
-        </View>
-        <View style={styles.actionButtons}>
-          <TouchableOpacity
-            onPress={() => handleEdit(item)}
-            style={styles.iconButton}
-          >
-            <MaterialIcons name="edit" size={22} color={theme.primary} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => deleteToDo(item.id)}
-            style={styles.iconButton}
-          >
-            <MaterialIcons name="delete" size={22} color="#f44336" />
-          </TouchableOpacity>
+            <Text style={styles.statusText}>
+              {item.status === "completed" ? "Completed" : "Pending"}
+            </Text>
+          </View>
         </View>
       </View>
-
-      {item.description ? (
-        <Text style={styles.description}>{item.description}</Text>
-      ) : null}
-
-      <View style={styles.cardFooter}>
-        <Text style={styles.date}>
-          {new Date(item.created_at).toLocaleDateString()}
-        </Text>
-        <View
-          style={[
-            styles.statusBadge,
-            item.status === "completed"
-              ? styles.completedBadge
-              : styles.pendingBadge,
-          ]}
-        >
-          <Text style={styles.statusText}>
-            {item.status === "completed" ? "Completed" : "Pending"}
-          </Text>
-        </View>
-      </View>
-    </View>
-  );
+    );
+  };
 
   const styles = StyleSheet.create({
     container: {
@@ -483,18 +477,12 @@ const ToDoApp = () => {
         </View>
       </View>
 
-      {loading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.primary} />
-        </View>
-      ) : (
-        <FlatList
-          data={toDo}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContainer}
-        />
-      )}
+      <FlatList
+        data={toDo}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={styles.listContainer}
+      />
 
       <Modal
         animationType="slide"
