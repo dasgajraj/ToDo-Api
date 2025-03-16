@@ -8,7 +8,10 @@ import {
   TextInput,
   Alert,
 } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, {
+   useState, 
+   useEffect 
+  }   from "react";
 import Checkbox from "expo-checkbox";
 import { MaterialIcons } from "@expo/vector-icons";
 import API from "@/Common/Api";

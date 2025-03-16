@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "ToDo-with-API",
-    "slug": "ToDo-with-API",
+    "name": "Just Do It",
+    "slug": "Just-Do-It",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/android-logo.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -13,14 +13,15 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/android-logo.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.dasgajraj.JustDoIt"
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/android-logo.png"
     },
     "plugins": [
       "expo-router",
@@ -36,6 +37,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "4918027a-23ba-4f63-a9de-e365392b55d6"
+      }
     }
   }
 }
